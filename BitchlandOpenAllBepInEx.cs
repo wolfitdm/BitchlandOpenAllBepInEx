@@ -52,6 +52,49 @@ namespace BitchlandOpenAllBepInEx
             Logger.LogInfo($"Plugin BitchlandOpenAllBepInEx BepInEx is loaded!");
         }
 
+        public static void ReplaceIconText(int_Lockable i)
+        {
+            if (i.InteractText.Contains("(Locked")) {
+                i.InteractText = i.InteractText.Replace("(Locked", "(Unlocked");
+                i.InteractIcon = i.DefaultInteractIcon;
+            }
+
+            if (i.InteractIcon == 1)
+            {
+                i.InteractIcon = i.DefaultInteractIcon;
+            }
+        }
+
+        [HarmonyPatch(typeof(int_Lockable), "OnLocked")]
+        [HarmonyPostfix] // call after the original method is called
+        public static void Int_Lockable_OnLocked(object __instance)
+        {
+            if (!enableThisMod)
+            {
+                return;
+            }
+
+            int_Lockable _this = (int_Lockable)__instance;
+            ReplaceIconText(_this);
+
+            return;
+        }
+
+        [HarmonyPatch(typeof(int_Lockable), "OnUnlocked")]
+        [HarmonyPostfix] // call after the original method is called
+        public static void Int_Lockablé_OnUnlocked(object __instance)
+        {
+            if (!enableThisMod)
+            {
+                return;
+            }
+
+            int_Lockable _this = (int_Lockable)__instance;
+            ReplaceIconText(_this);
+
+            return;
+        }
+
         [HarmonyPatch(typeof(Int_Door), "Interact")]
         [HarmonyPrefix] // call before the original method is called
         public static bool Int_Door_Interact(Person person, object __instance)
@@ -81,6 +124,8 @@ namespace BitchlandOpenAllBepInEx
 
             return true;
         }
+
+
 
         [HarmonyPatch(typeof(int_MoveableDoor), "Interact")]
         [HarmonyPrefix] // call before the original method is called

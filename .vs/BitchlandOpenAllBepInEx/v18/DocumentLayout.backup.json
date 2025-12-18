@@ -1,0 +1,45 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\CdemyTeilnehmer\\Downloads\\BitchLand_build10e_preinstalledmods\\build10e\\BitchlandOpenAllBepInEx\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0C896484-42E3-8758-0CEB-466F5E4FFBB7}|BitchlandOpenAllBepInEx.csproj|c:\\users\\cdemyteilnehmer\\downloads\\bitchland_build10e_preinstalledmods\\build10e\\bitchlandopenallbepinex\\bitchlandopenallbepinex.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C896484-42E3-8758-0CEB-466F5E4FFBB7}|BitchlandOpenAllBepInEx.csproj|solutionrelative:bitchlandopenallbepinex.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "BitchlandOpenAllBepInEx.cs",
+              "DocumentMoniker": "C:\\Users\\CdemyTeilnehmer\\Downloads\\BitchLand_build10e_preinstalledmods\\build10e\\BitchlandOpenAllBepInEx\\BitchlandOpenAllBepInEx.cs",
+              "RelativeDocumentMoniker": "BitchlandOpenAllBepInEx.cs",
+              "ToolTip": "C:\\Users\\CdemyTeilnehmer\\Downloads\\BitchLand_build10e_preinstalledmods\\build10e\\BitchlandOpenAllBepInEx\\BitchlandOpenAllBepInEx.cs",
+              "RelativeToolTip": "BitchlandOpenAllBepInEx.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAawDkAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-18T04:17:36.642Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
