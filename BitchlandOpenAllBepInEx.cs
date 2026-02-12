@@ -20,6 +20,9 @@ namespace BitchlandOpenAllBepInEx
         internal static new ManualLogSource Logger;
 
         private ConfigEntry<bool> configEnableMe;
+        private ConfigEntry<bool> configUseNewLockUpdate;
+        private ConfigEntry<bool> configDefaultLockState;
+        private ConfigEntry<bool> configUseReplaceIconText;
 
         public BitchlandOpenAllBepInEx()
         {
@@ -33,6 +36,9 @@ namespace BitchlandOpenAllBepInEx
         private static string pluginKey = "General.Toggles";
 
         public static bool enableThisMod = false;
+        public static bool useNewLockUpdate = false;
+        public static bool defaultLockState = false;
+        public static bool useReplaceIconText = false;
 
         private void Awake()
         {
@@ -44,160 +50,215 @@ namespace BitchlandOpenAllBepInEx
                                               true,
                                              "Whether or not you want enable this mod (default true also yes, you want it, and false = no)");
 
+            configUseNewLockUpdate = Config.Bind(pluginKey,
+                                             "UseNewLockUpdate",
+                                             true,
+                                            "Whether or not you want use the new lock update (works on all future builds) (default true also yes, you want it, and false = no)");
+
+            configDefaultLockState = Config.Bind(pluginKey,
+                                 "DefaultLockState",
+                                 false,
+                                "DefaultLockState = false -> all doors/lockables are opened, true -> all doors/lockables are closed");
+
+            configUseReplaceIconText = Config.Bind(pluginKey,
+                     "UseReplaceIconText",
+                     false,
+                    "true -> Replace interactText (Locked -> (Unlocked and replace (Unlocked -> (Locked if you open/close lockables (in the future you can set this to false)");
+
 
             enableThisMod = configEnableMe.Value;
+            useNewLockUpdate = configUseNewLockUpdate.Value;
+            defaultLockState = configDefaultLockState.Value;
+            useReplaceIconText = configUseReplaceIconText.Value;
 
-            Harmony.CreateAndPatchAll(typeof(BitchlandOpenAllBepInEx));
+            PatchHarmonyMethods();
 
             Logger.LogInfo($"Plugin BitchlandOpenAllBepInEx BepInEx is loaded!");
         }
 
-        public static void ReplaceIconText(int_Lockable i)
+        public static void PatchHarmonyMethods()
         {
-            if (i.InteractText.Contains("(Locked")) {
-                i.InteractText = i.InteractText.Replace("(Locked", "(Unlocked");
-                i.InteractIcon = i.DefaultInteractIcon;
+            if (!enableThisMod)
+            {
+                return;
             }
 
-            if (i.InteractIcon == 1)
+            if (useNewLockUpdate || !useReplaceIconText)
             {
-                i.InteractIcon = i.DefaultInteractIcon;
+                PatchHarmonyMethodUnity(typeof(int_Lockable), "Start", "Int_Lockable_Start", false, true);
+            } else
+            {
+                PatchHarmonyMethodUnity(typeof(int_Lockable), "OnLocked", "Int_Lockable_OnLocked", false, true);
+                PatchHarmonyMethodUnity(typeof(int_Lockable), "OnUnlocked", "Int_Lockable_OnUnlocked", false, true);
+                PatchHarmonyMethodUnity(typeof(Interactible), "Interact", "int_Lockable_Interact", true, false);
+                PatchHarmonyMethodUnity(typeof(Int_Door), "Interact", "Int_Door_Interact", true, false);
+                PatchHarmonyMethodUnity(typeof(Int_Drive), "Interact", "Int_Drive_Interact", true, false);
+                PatchHarmonyMethodUnity(typeof(int_MoveableDoor), "Interact", "Int_MoveableDoor_Interact", true, false);
+                PatchHarmonyMethodUnity(typeof(Int_SexMachine), "Interact", "Int_SexMachine_Interact", false, true);
+                PatchHarmonyMethodUnity(typeof(int_SexTubeBike), "Interact", "Int_SexTubeBike_Interact", true, false);
+                PatchHarmonyMethodUnity(typeof(Int_Storage), "Interact", "Int_Storage_Interact", true, false);
+                PatchHarmonyMethodUnity(typeof(TeleportDoor), "Interact", "TeleportDoor_Interact", true, false);
             }
         }
+        public static void PatchHarmonyMethodUnity(Type originalClass, string originalMethodName, string patchedMethodName, bool usePrefix, bool usePostfix)
+        {
+            // Create a new Harmony instance with a unique ID
+            var harmony = new Harmony("com.wolfitdm.BitchlandOpenAllBepInEx");
 
-        [HarmonyPatch(typeof(int_Lockable), "OnLocked")]
-        [HarmonyPostfix] // call after the original method is called
+            if (originalClass == null)
+            {
+                Logger.LogInfo($"GetType originalClass == null");
+                return;
+            }
+
+            // Or apply patches manually
+            MethodInfo original = AccessTools.Method(originalClass, originalMethodName);
+
+            if (original == null)
+            {
+                Logger.LogInfo($"AccessTool.Method original {originalMethodName} == null");
+                return;
+            }
+
+            MethodInfo patched = AccessTools.Method(typeof(BitchlandOpenAllBepInEx), patchedMethodName);
+
+            if (patched == null)
+            {
+                Logger.LogInfo($"AccessTool.Method patched {patchedMethodName} == null");
+                return;
+
+            }
+
+            HarmonyMethod patchedMethod = new HarmonyMethod(patched);
+            var prefixMethod = usePrefix ? patchedMethod : null;
+            var postfixMethod = usePostfix ? patchedMethod : null;
+
+            harmony.Patch(original,
+                prefix: prefixMethod,
+                postfix: postfixMethod);
+        }
+
+        public static void ReplaceIconText(int_Lockable i, bool state)
+        {
+            if (state == false)
+            {
+                if (i.InteractText.Contains("(Locked"))
+                {
+                    i.InteractText = i.InteractText.Replace("(Locked", "(Unlocked");
+                    i.InteractIcon = i.DefaultInteractIcon;
+                }
+
+                if (i.InteractIcon == 1)
+                {
+                    i.InteractIcon = i.DefaultInteractIcon;
+                }
+            }
+            else
+            {
+                if (i.InteractText.Contains("(Unlocked"))
+                {
+                    i.InteractText = i.InteractText.Replace("(Unlocked", "(Locked");
+                    i.InteractIcon = 1;
+                }
+
+                if (i.InteractIcon == i.DefaultInteractIcon)
+                {
+                    i.InteractIcon = 1;
+                }
+            }
+        }
+        public static void Int_Lockable_Start(object __instance)
+        {
+            if (!enableThisMod)
+            {
+                return;
+            }
+
+            int_Lockable _this = (int_Lockable)__instance;
+
+            _this.Locked = defaultLockState;
+
+            return;
+        }
+
         public static void Int_Lockable_OnLocked(object __instance)
         {
-            if (!enableThisMod)
-            {
-                return;
-            }
-
             int_Lockable _this = (int_Lockable)__instance;
-            ReplaceIconText(_this);
+            ReplaceIconText(_this, defaultLockState);
 
             return;
         }
-
-        [HarmonyPatch(typeof(int_Lockable), "OnUnlocked")]
-        [HarmonyPostfix] // call after the original method is called
-        public static void Int_Lockablé_OnUnlocked(object __instance)
+        public static void Int_Lockable_OnUnlocked(object __instance)
         {
-            if (!enableThisMod)
-            {
-                return;
-            }
-
             int_Lockable _this = (int_Lockable)__instance;
-            ReplaceIconText(_this);
+            ReplaceIconText(_this, defaultLockState);
 
             return;
         }
 
-        [HarmonyPatch(typeof(Int_Door), "Interact")]
-        [HarmonyPrefix] // call before the original method is called
+        public static bool int_Lockable_Interact(Person person, object __instance)
+        {
+            if (!(__instance is int_Lockable))
+            {
+                return true;
+            }
+
+            int_Lockable _this = (int_Lockable)__instance;
+            _this.m_Locked = defaultLockState;
+
+            return true;
+        }
         public static bool Int_Door_Interact(Person person, object __instance)
         {
-            if (!enableThisMod)
-            {
-                return true;
-            }
-
             Int_Door _this = (Int_Door) __instance;
-            _this.m_Locked = false;
+            _this.m_Locked = defaultLockState;
 
             return true;
         }
-
-        [HarmonyPatch(typeof(Int_Drive), "Interact")]
-        [HarmonyPrefix] // call before the original method is called
         public static bool Int_Drive_Interact(Person person, object __instance)
         {
-            if (!enableThisMod)
-            {
-                return true;
-            }
-
             Int_Drive _this = (Int_Drive)__instance;
-            _this.m_Locked = false;
+            _this.m_Locked = defaultLockState;
 
             return true;
         }
 
-
-
-        [HarmonyPatch(typeof(int_MoveableDoor), "Interact")]
-        [HarmonyPrefix] // call before the original method is called
         public static bool Int_MoveableDoor_Interact(Person person, object __instance)
         {
-            if (!enableThisMod)
-            {
-                return true;
-            }
-
             int_MoveableDoor _this = (int_MoveableDoor)__instance;
-            _this.m_Locked = false;
+            _this.m_Locked = defaultLockState;
 
             return true;
         }
 
-        [HarmonyPatch(typeof(Int_SexMachine), "Interact")]
-        [HarmonyPrefix] // call before the original method is called
         public static bool Int_SexMachine_Interact(Person person, object __instance)
         {
-            if (!enableThisMod)
-            {
-                return true;
-            }
-
             Int_SexMachine _this = (Int_SexMachine)__instance;
-            _this.m_Locked = false;
+            _this.m_Locked = defaultLockState;
 
             return true;
         }
 
-        [HarmonyPatch(typeof(int_SexTubeBike), "Interact")]
-        [HarmonyPrefix] // call before the original method is called
         public static bool Int_SexTubeBike_Interact(Person person, object __instance)
         {
-            if (!enableThisMod)
-            {
-                return true;
-            }
-
             int_SexTubeBike _this = (int_SexTubeBike)__instance;
-            _this.m_Locked = false;
+            _this.m_Locked = defaultLockState;
 
             return true;
         }
 
-        [HarmonyPatch(typeof(Int_Storage), "Interact")]
-        [HarmonyPrefix] // call before the original method is called
         public static bool Int_Storage_Interact(Person person, object __instance)
         {
-            if (!enableThisMod)
-            {
-                return true;
-            }
-
             Int_Storage _this = (Int_Storage)__instance;
-            _this.m_Locked = false;
+            _this.m_Locked = defaultLockState;
 
             return true;
         }
 
-        [HarmonyPatch(typeof(TeleportDoor), "Interact")]
-        [HarmonyPrefix] // call before the original method is called
         public static bool TeleportDoor_Interact(Person person, object __instance)
         {
-            if (!enableThisMod)
-            {
-                return true;
-            }
-
             TeleportDoor _this = (TeleportDoor)__instance;
-            _this.m_Locked = false;
+            _this.m_Locked = defaultLockState;
 
             return true;
         }
