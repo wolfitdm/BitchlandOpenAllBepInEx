@@ -86,7 +86,8 @@ namespace BitchlandOpenAllBepInEx
             if (useNewLockUpdate || !useReplaceIconText)
             {
                 PatchHarmonyMethodUnity(typeof(int_Lockable), "Start", "Int_Lockable_Start", false, true);
-            } else
+            }
+            else
             {
                 PatchHarmonyMethodUnity(typeof(int_Lockable), "OnLocked", "Int_Lockable_OnLocked", false, true);
                 PatchHarmonyMethodUnity(typeof(int_Lockable), "OnUnlocked", "Int_Lockable_OnUnlocked", false, true);
@@ -100,10 +101,13 @@ namespace BitchlandOpenAllBepInEx
                 PatchHarmonyMethodUnity(typeof(TeleportDoor), "Interact", "TeleportDoor_Interact", true, false);
             }
         }
-        public static void PatchHarmonyMethodUnity(Type originalClass, string originalMethodName, string patchedMethodName, bool usePrefix, bool usePostfix)
+        public static void PatchHarmonyMethodUnity(Type originalClass, string originalMethodName, string patchedMethodName, bool usePrefix, bool usePostfix, Type[] parameters = null)
         {
+            string uniqueId = "com.wolfitdm.BitchlandOpenAllBepInEx";
+            Type uniqueType = typeof(BitchlandOpenAllBepInEx);
+
             // Create a new Harmony instance with a unique ID
-            var harmony = new Harmony("com.wolfitdm.BitchlandOpenAllBepInEx");
+            var harmony = new Harmony(uniqueId);
 
             if (originalClass == null)
             {
@@ -111,22 +115,111 @@ namespace BitchlandOpenAllBepInEx
                 return;
             }
 
-            // Or apply patches manually
-            MethodInfo original = AccessTools.Method(originalClass, originalMethodName);
+            MethodInfo patched = null;
 
-            if (original == null)
+            try
             {
-                Logger.LogInfo($"AccessTool.Method original {originalMethodName} == null");
-                return;
+                patched = AccessTools.Method(uniqueType, patchedMethodName);
             }
-
-            MethodInfo patched = AccessTools.Method(typeof(BitchlandOpenAllBepInEx), patchedMethodName);
+            catch (Exception ex)
+            {
+                patched = null;
+            }
 
             if (patched == null)
             {
                 Logger.LogInfo($"AccessTool.Method patched {patchedMethodName} == null");
                 return;
 
+            }
+
+            // Or apply patches manually
+            MethodInfo original = null;
+
+            try
+            {
+                if (parameters == null)
+                {
+                    original = AccessTools.Method(originalClass, originalMethodName);
+                }
+                else
+                {
+                    original = AccessTools.Method(originalClass, originalMethodName, parameters);
+                }
+            }
+            catch (AmbiguousMatchException ex)
+            {
+                Type[] nullParameters = new Type[] { };
+                try
+                {
+                    if (patched == null)
+                    {
+                        parameters = nullParameters;
+                    }
+
+                    ParameterInfo[] parameterInfos = patched.GetParameters();
+
+                    if (parameterInfos == null || parameterInfos.Length == 0)
+                    {
+                        parameters = nullParameters;
+                    }
+
+                    List<Type> parametersN = new List<Type>();
+
+                    for (int i = 0; i < parameterInfos.Length; i++)
+                    {
+                        ParameterInfo parameterInfo = parameterInfos[i];
+
+                        if (parameterInfo == null)
+                        {
+                            continue;
+                        }
+
+                        if (parameterInfo.Name == null)
+                        {
+                            continue;
+                        }
+
+                        if (parameterInfo.Name.StartsWith("__"))
+                        {
+                            continue;
+                        }
+
+                        Type type = parameterInfos[i].ParameterType;
+
+                        if (type == null)
+                        {
+                            continue;
+                        }
+
+                        parametersN.Add(type);
+                    }
+
+                    parameters = parametersN.ToArray();
+                }
+                catch (Exception ex2)
+                {
+                    parameters = nullParameters;
+                }
+
+                try
+                {
+                    original = AccessTools.Method(originalClass, originalMethodName, parameters);
+                }
+                catch (Exception ex2)
+                {
+                    original = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                original = null;
+            }
+
+            if (original == null)
+            {
+                Logger.LogInfo($"AccessTool.Method original {originalMethodName} == null");
+                return;
             }
 
             HarmonyMethod patchedMethod = new HarmonyMethod(patched);
