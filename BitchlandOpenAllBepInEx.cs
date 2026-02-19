@@ -22,6 +22,8 @@ namespace BitchlandOpenAllBepInEx
         private ConfigEntry<bool> configEnableMe;
         private ConfigEntry<bool> configUseNewLockUpdate;
         private ConfigEntry<bool> configDefaultLockState;
+        private ConfigEntry<bool> configDefaultPlayerOwnedState;
+        private ConfigEntry<bool> configUsePlayerOwnedState;
         private ConfigEntry<bool> configUseReplaceIconText;
 
         public BitchlandOpenAllBepInEx()
@@ -38,6 +40,8 @@ namespace BitchlandOpenAllBepInEx
         public static bool enableThisMod = false;
         public static bool useNewLockUpdate = false;
         public static bool defaultLockState = false;
+        public static bool defaultPlayerOwnedState = false;
+        public static bool usePlayerOwnedState = false;
         public static bool useReplaceIconText = false;
 
         private void Awake()
@@ -60,6 +64,18 @@ namespace BitchlandOpenAllBepInEx
                                  false,
                                 "DefaultLockState = false -> all doors/lockables are opened, true -> all doors/lockables are closed");
 
+            configUsePlayerOwnedState = Config.Bind(pluginKey,
+                    "UsePlayerOwnedState",
+                    true,
+                    "Whether or not you want use player owned state (default true also yes, you want it and false = no)");
+
+
+            configDefaultPlayerOwnedState = Config.Bind(pluginKey,
+                     "DefaultPlayerOwnedState",
+                     true,
+                    "DefaultPlayerOwnedState = true -> all doors/lockables owned you, false -> all doors/lockables not owned you");
+
+
             configUseReplaceIconText = Config.Bind(pluginKey,
                      "UseReplaceIconText",
                      false,
@@ -69,6 +85,8 @@ namespace BitchlandOpenAllBepInEx
             enableThisMod = configEnableMe.Value;
             useNewLockUpdate = configUseNewLockUpdate.Value;
             defaultLockState = configDefaultLockState.Value;
+            defaultPlayerOwnedState = configDefaultPlayerOwnedState.Value;
+            usePlayerOwnedState = configUsePlayerOwnedState.Value;
             useReplaceIconText = configUseReplaceIconText.Value;
 
             PatchHarmonyMethods();
@@ -260,6 +278,20 @@ namespace BitchlandOpenAllBepInEx
                 }
             }
         }
+
+        public static void setPlayerOwned(int_Lockable i, bool state)
+        {
+            if (!usePlayerOwnedState)
+            {
+                return;
+            }
+
+            try
+            {
+                i.PlayerOwned = state;
+            } catch (Exception e) {
+            }
+        }
         public static void Int_Lockable_Start(object __instance)
         {
             if (!enableThisMod)
@@ -270,6 +302,7 @@ namespace BitchlandOpenAllBepInEx
             int_Lockable _this = (int_Lockable)__instance;
 
             _this.Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return;
         }
@@ -298,6 +331,7 @@ namespace BitchlandOpenAllBepInEx
 
             int_Lockable _this = (int_Lockable)__instance;
             _this.m_Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return true;
         }
@@ -305,6 +339,7 @@ namespace BitchlandOpenAllBepInEx
         {
             Int_Door _this = (Int_Door) __instance;
             _this.m_Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return true;
         }
@@ -312,6 +347,7 @@ namespace BitchlandOpenAllBepInEx
         {
             Int_Drive _this = (Int_Drive)__instance;
             _this.m_Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return true;
         }
@@ -320,6 +356,7 @@ namespace BitchlandOpenAllBepInEx
         {
             int_MoveableDoor _this = (int_MoveableDoor)__instance;
             _this.m_Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return true;
         }
@@ -328,6 +365,7 @@ namespace BitchlandOpenAllBepInEx
         {
             Int_SexMachine _this = (Int_SexMachine)__instance;
             _this.m_Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return true;
         }
@@ -336,6 +374,7 @@ namespace BitchlandOpenAllBepInEx
         {
             int_SexTubeBike _this = (int_SexTubeBike)__instance;
             _this.m_Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return true;
         }
@@ -344,6 +383,7 @@ namespace BitchlandOpenAllBepInEx
         {
             Int_Storage _this = (Int_Storage)__instance;
             _this.m_Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return true;
         }
@@ -352,6 +392,7 @@ namespace BitchlandOpenAllBepInEx
         {
             TeleportDoor _this = (TeleportDoor)__instance;
             _this.m_Locked = defaultLockState;
+            setPlayerOwned(_this, defaultPlayerOwnedState);
 
             return true;
         }
