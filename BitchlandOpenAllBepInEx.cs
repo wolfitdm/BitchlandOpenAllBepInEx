@@ -302,8 +302,13 @@ namespace BitchlandOpenAllBepInEx
             int_Lockable _this = (int_Lockable)__instance;
 
             _this.Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
-
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
             return;
         }
 
@@ -331,7 +336,13 @@ namespace BitchlandOpenAllBepInEx
 
             int_Lockable _this = (int_Lockable)__instance;
             _this.m_Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
 
             return true;
         }
@@ -339,7 +350,13 @@ namespace BitchlandOpenAllBepInEx
         {
             Int_Door _this = (Int_Door) __instance;
             _this.m_Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
 
             return true;
         }
@@ -347,7 +364,13 @@ namespace BitchlandOpenAllBepInEx
         {
             Int_Drive _this = (Int_Drive)__instance;
             _this.m_Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
 
             return true;
         }
@@ -356,7 +379,13 @@ namespace BitchlandOpenAllBepInEx
         {
             int_MoveableDoor _this = (int_MoveableDoor)__instance;
             _this.m_Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
 
             return true;
         }
@@ -365,7 +394,13 @@ namespace BitchlandOpenAllBepInEx
         {
             Int_SexMachine _this = (Int_SexMachine)__instance;
             _this.m_Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
 
             return true;
         }
@@ -374,7 +409,13 @@ namespace BitchlandOpenAllBepInEx
         {
             int_SexTubeBike _this = (int_SexTubeBike)__instance;
             _this.m_Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
 
             return true;
         }
@@ -383,7 +424,13 @@ namespace BitchlandOpenAllBepInEx
         {
             Int_Storage _this = (Int_Storage)__instance;
             _this.m_Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
 
             return true;
         }
@@ -392,7 +439,13 @@ namespace BitchlandOpenAllBepInEx
         {
             TeleportDoor _this = (TeleportDoor)__instance;
             _this.m_Locked = defaultLockState;
-            setPlayerOwned(_this, defaultPlayerOwnedState);
+            try
+            {
+                setPlayerOwned(_this, defaultPlayerOwnedState);
+            }
+            catch (Exception e)
+            {
+            }
 
             return true;
         }
